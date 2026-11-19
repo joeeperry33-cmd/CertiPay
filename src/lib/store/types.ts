@@ -53,6 +53,8 @@ export interface StoredEntry {
   classificationId: string | null;
   date: string; // YYYY-MM-DD
   hours: Hundredths;
+  /** Order worked within the day (overtime goes to the last job of the day). */
+  sortOrder?: number;
 }
 
 export interface Company {

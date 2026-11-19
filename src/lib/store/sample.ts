@@ -1,3 +1,4 @@
+import { newId } from "../ids";
 import type { StoreData } from "./types";
 import { addDays } from "../dates";
 
@@ -115,5 +116,27 @@ export function sampleData(weekStart: string): StoreData {
       { id: "j3", employeeId: "e2", projectId: "p2", classificationId: null, date: d(3), hours: 800 },
       { id: "j4", employeeId: "e2", projectId: "p1", classificationId: "c2", date: d(4), hours: 600 },
     ],
+  };
+}
+
+/** Replace the sample's short ids ("e1", "p1"...) with UUIDs so it can be saved to the database. */
+export function withFreshIds(data: StoreData): StoreData {
+  const map = new Map<string, string>();
+  const id = (old: string) => {
+    if (!map.has(old)) map.set(old, newId());
+    return map.get(old)!;
+  };
+  return {
+    ...data,
+    employees: data.employees.map((e) => ({ ...e, id: id(e.id) })),
+    projects: data.projects.map((p) => ({ ...p, id: id(p.id) })),
+    classifications: data.classifications.map((c) => ({ ...c, id: id(c.id), projectId: id(c.projectId) })),
+    entries: data.entries.map((e) => ({
+      ...e,
+      id: id(e.id),
+      employeeId: id(e.employeeId),
+      projectId: id(e.projectId),
+      classificationId: e.classificationId && id(e.classificationId),
+    })),
   };
 }

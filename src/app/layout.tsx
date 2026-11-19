@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Nav } from "@/components/Nav";
+import { AuthGate } from "@/components/AuthGate";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,7 +30,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Nav />
-        <div className="mx-auto max-w-6xl px-4 py-8 print:max-w-none print:p-0">{children}</div>
+        <div className="mx-auto max-w-6xl px-4 py-8 print:max-w-none print:p-0">
+          <AuthGate>{children}</AuthGate>
+        </div>
       </body>
     </html>
   );

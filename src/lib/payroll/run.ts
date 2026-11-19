@@ -29,7 +29,7 @@ export function runWeek(data: StoreData, weekStart: string): WeekPayroll {
   for (const employee of data.employees) {
     const entries: TimeEntry[] = data.entries
       .filter((e) => e.employeeId === employee.id && dates.includes(e.date) && e.hours > 0)
-      .sort((a, b) => a.date.localeCompare(b.date))
+      .sort((a, b) => a.date.localeCompare(b.date) || (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
       .map((e) => ({
         date: e.date,
         projectId: e.projectId,

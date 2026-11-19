@@ -16,7 +16,8 @@ interface Row {
 
 function rowsFor(data: StoreData, employeeId: string, dates: string[]): Row[] {
   const rows: Row[] = [];
-  for (const e of data.entries) {
+  const ordered = [...data.entries].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+  for (const e of ordered) {
     if (e.employeeId !== employeeId || !dates.includes(e.date)) continue;
     let row = rows.find((r) => r.projectId === e.projectId && r.classificationId === e.classificationId);
     if (!row) {
@@ -88,9 +89,10 @@ function WeekGrid({ data, employeeId, weekStart }: { data: StoreData; employeeId
   const weekTotal = dates.reduce((s, _, i) => s + dayTotal(i), 0);
 
   const save = () => {
-    const entries = rows.flatMap((r) =>
+    const entries = rows.flatMap((r, rowIndex) =>
       dates
         .map((date, i) => ({
+          sortOrder: rowIndex,
           id: newId(),
           employeeId,
           projectId: r.projectId,
