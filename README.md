@@ -31,3 +31,18 @@ npm install
 npm test
 npm run dev
 ```
+
+## Accounts and database (Supabase)
+
+Without settings the app runs as a browser-only preview (data stays in that browser).
+To turn on sign-in and the shared database, copy `.env.example` to `.env.local` and fill in:
+
+- `NEXT_PUBLIC_SUPABASE_URL`: the project URL (Project Settings > Data API)
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`: the publishable key (Project Settings > API Keys)
+
+Both are safe to expose in the browser: every table has row level security, so a
+signed-in user only sees companies they belong to. Set the same two variables on
+the hosting provider when deploying, and add the site's URL under
+Authentication > URL Configuration so confirmation emails link back to it.
+
+Apply `supabase/migrations/*.sql` in order (SQL editor or `supabase db push`).
