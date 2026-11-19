@@ -203,6 +203,12 @@ function ProjectForm({
               <Field label="DIR project ID" hint="From the awarding body's PWC-100 filing.">
                 <Input value={p.dirProjectId} onChange={(x) => set({ dirProjectId: x.target.value })} />
               </Field>
+              <Field label="Wage determination number" hint="From the DIR determination or the federal WD in the contract.">
+                <Input
+                  value={p.wageDeterminationNumber ?? ""}
+                  onChange={(x) => set({ wageDeterminationNumber: x.target.value })}
+                />
+              </Field>
             </>
           )}
         </div>

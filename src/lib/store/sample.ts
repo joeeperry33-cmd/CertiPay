@@ -27,6 +27,9 @@ export function sampleData(weekStart: string): StoreData {
       fein: "00-0000000",
       dirRegistration: "1000000000",
       cslbLicense: "000000",
+      signerName: "Pat Sample",
+      signerTitle: "President",
+      phone: "(559) 555-0100",
     },
     employees: [
       {
@@ -61,6 +64,7 @@ export function sampleData(weekStart: string): StoreData {
         projectNumber: "24-017",
         awardingBody: "Sample Unified School District",
         dirProjectId: "0000000",
+        wageDeterminationNumber: "FRE-2025-1 (sample)",
         county: "Fresno",
         location: "500 Elm St, Fresno, CA",
         isPrevailingWage: true,

@@ -48,6 +48,18 @@ function CompanyForm({ initial }: { initial: Company }) {
           <Field label="DIR public works registration number">
             <Input value={c.dirRegistration} onChange={(e) => set({ dirRegistration: e.target.value })} />
           </Field>
+          <Field label="Who signs certified payroll" hint="Name of the owner or officer who certifies.">
+            <Input value={c.signerName ?? ""} onChange={(e) => set({ signerName: e.target.value })} />
+          </Field>
+          <Field label="Their title">
+            <Input value={c.signerTitle ?? ""} onChange={(e) => set({ signerTitle: e.target.value })} />
+          </Field>
+          <Field label="Phone">
+            <Input type="tel" value={c.phone ?? ""} onChange={(e) => set({ phone: e.target.value })} />
+          </Field>
+          <Field label="Email">
+            <Input type="email" value={c.email ?? ""} onChange={(e) => set({ email: e.target.value })} />
+          </Field>
         </div>
         <div className="mt-6 flex items-center gap-3">
           <Button type="submit">Save</Button>
