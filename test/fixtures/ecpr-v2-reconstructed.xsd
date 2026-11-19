@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  TEST FIXTURE ONLY. This is NOT DIR's file. It is rebuilt from the element order and
+  facets documented in DIR's eCPR V2 guide, blank template and eCPR-v2.xsd
+  (https://www.dir.ca.gov/Public-Works/CPR/eCPR-v2.xsd), so tests can catch structural
+  mistakes. If DIR's XSD can be downloaded, replace this file with it.
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="https://www.dir.ca.gov/Public-Works/CPR/eCPR-v2.xsd"
+           xmlns:CPR="https://www.dir.ca.gov/Public-Works/CPR/eCPR-v2.xsd"
+           elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+  <xs:simpleType name="str56"><xs:restriction base="xs:string"><xs:minLength value="1"/><xs:maxLength value="56"/></xs:restriction></xs:simpleType>
+  <xs:simpleType name="bool"><xs:restriction base="xs:string"><xs:pattern value="true|false"/></xs:restriction></xs:simpleType>
+  <xs:simpleType name="hrs"><xs:restriction base="xs:decimal"><xs:minInclusive value="0"/><xs:maxExclusive value="100"/><xs:fractionDigits value="2"/></xs:restriction></xs:simpleType>
+  <xs:simpleType name="tot"><xs:restriction base="xs:decimal"><xs:minInclusive value="0"/><xs:fractionDigits value="2"/></xs:restriction></xs:simpleType>
+  <xs:simpleType name="amt"><xs:restriction base="xs:decimal"><xs:minInclusive value="0"/><xs:maxExclusive value="100000000"/><xs:fractionDigits value="2"/></xs:restriction></xs:simpleType>
+  <xs:simpleType name="rate"><xs:restriction base="xs:decimal"><xs:minInclusive value="0"/><xs:maxExclusive value="10000"/><xs:fractionDigits value="2"/></xs:restriction></xs:simpleType>
+  <xs:simpleType name="ratePos"><xs:restriction base="xs:decimal"><xs:minExclusive value="0"/><xs:maxExclusive value="10000"/><xs:fractionDigits value="2"/></xs:restriction></xs:simpleType>
+  <xs:simpleType name="taxId"><xs:restriction base="xs:string"><xs:pattern value="[0-9]{9}|"/></xs:restriction></xs:simpleType>
+
+  <xs:element name="eCPR">
+    <xs:complexType><xs:sequence>
+      <xs:element name="version"><xs:simpleType><xs:restriction base="xs:string"><xs:pattern value="2\.[0-9]+"/></xs:restriction></xs:simpleType></xs:element>
+      <xs:element name="contractorInfo"><xs:complexType><xs:sequence>
+        <xs:element name="contractorName" type="CPR:str56"/>
+        <xs:element name="contractorPWCR"><xs:simpleType><xs:restriction base="xs:string"><xs:pattern value="[0-9]{10}"/></xs:restriction></xs:simpleType></xs:element>
+      </xs:sequence></xs:complexType></xs:element>
+      <xs:element name="projectInfo"><xs:complexType><xs:sequence>
+        <xs:element name="awardingBody" minOccurs="0"><xs:simpleType><xs:restriction base="xs:string"><xs:maxLength value="56"/></xs:restriction></xs:simpleType></xs:element>
+        <xs:element name="projectID"><xs:simpleType><xs:restriction base="xs:string"><xs:pattern value="[0-9]{1,18}"/></xs:restriction></xs:simpleType></xs:element>
+      </xs:sequence></xs:complexType></xs:element>
+      <xs:element name="payrollInfo"><xs:complexType><xs:sequence>
+        <xs:element name="statementOfNP" type="CPR:bool"/>
+        <xs:element name="forWeekEnding" type="xs:date"/>
+        <xs:element name="payrollNum" minOccurs="0"/>
+        <xs:element name="amendmentNum" minOccurs="0"/>
+        <xs:element name="employees" nillable="true"><xs:complexType><xs:sequence>
+          <xs:element name="employee" minOccurs="0" maxOccurs="500"><xs:complexType><xs:sequence>
+            <xs:element name="firstName" type="CPR:str56"/>
+            <xs:element name="lastName" type="CPR:str56"/>
+            <xs:element name="middleName" minOccurs="0"><xs:simpleType><xs:restriction base="xs:string"><xs:maxLength value="56"/></xs:restriction></xs:simpleType></xs:element>
+            <xs:element name="address"><xs:complexType><xs:sequence>
+              <xs:element name="street"><xs:simpleType><xs:restriction base="xs:string"><xs:minLength value="1"/><xs:maxLength value="40"/></xs:restriction></xs:simpleType></xs:element>
+              <xs:element name="city"><xs:simpleType><xs:restriction base="xs:string"><xs:minLength value="1"/><xs:maxLength value="250"/></xs:restriction></xs:simpleType></xs:element>
+              <xs:element name="state"><xs:simpleType><xs:restriction base="xs:string"><xs:pattern value="[A-Z]{2}"/></xs:restriction></xs:simpleType></xs:element>
+              <xs:element name="zip"><xs:simpleType><xs:restriction base="xs:string"><xs:pattern value="[0-9]{5}(-[0-9]{4})?"/></xs:restriction></xs:simpleType></xs:element>
+            </xs:sequence></xs:complexType></xs:element>
+            <xs:element name="ssn" type="CPR:taxId"/>
+            <xs:element name="itin" type="CPR:taxId"/>
+            <xs:element name="notes" minOccurs="0"><xs:simpleType><xs:restriction base="xs:string"><xs:maxLength value="256"/></xs:restriction></xs:simpleType></xs:element>
+            <xs:element name="classifications"><xs:complexType><xs:sequence>
+              <xs:element name="classification" maxOccurs="unbounded"><xs:complexType><xs:sequence>
+                <xs:element name="craft"><xs:simpleType><xs:restriction base="xs:string"><xs:minLength value="1"/><xs:maxLength value="100"/></xs:restriction></xs:simpleType></xs:element>
+                <xs:element name="employeeLevel"><xs:simpleType><xs:restriction base="xs:string"><xs:pattern value="journeyman|apprentice"/></xs:restriction></xs:simpleType></xs:element>
+                <xs:element name="apprenticeLevel" minOccurs="0"><xs:simpleType><xs:restriction base="xs:string"><xs:pattern value="[1-9]|10|"/></xs:restriction></xs:simpleType></xs:element>
+                <xs:element name="hrsWorkedEachDay"><xs:complexType><xs:sequence>
+                  <xs:element name="day" minOccurs="7" maxOccurs="7"><xs:complexType><xs:sequence>
+                    <xs:element name="date" type="xs:date"/>
+                    <xs:element name="straightTime" type="CPR:hrs"/>
+                    <xs:element name="overtime" type="CPR:hrs"/>
+                    <xs:element name="doubletime" type="CPR:hrs"/>
+                  </xs:sequence><xs:attribute name="id" type="xs:integer" use="required"/></xs:complexType></xs:element>
+                </xs:sequence></xs:complexType></xs:element>
+                <xs:element name="fringePaid"><xs:complexType><xs:sequence>
+                  <xs:element name="paidToEmployee" type="CPR:bool"/>
+                  <xs:element name="paidToBenefitPlan" type="CPR:bool"/>
+                </xs:sequence></xs:complexType></xs:element>
+                <xs:element name="fringe"><xs:complexType><xs:sequence>
+                  <xs:element name="healthWelfare" type="CPR:amt"/>
+                  <xs:element name="vacationHoliday" type="CPR:amt"/>
+                  <xs:element name="pension" type="CPR:amt"/>
+                  <xs:element name="training" type="CPR:amt"/>
+                  <xs:element name="other" type="CPR:amt"/>
+                </xs:sequence></xs:complexType></xs:element>
+                <xs:element name="totHrs"><xs:complexType><xs:sequence>
+                  <xs:element name="totHrsStraightTime" type="CPR:tot"/>
+                  <xs:element name="totHrsOvertime" type="CPR:tot"/>
+                  <xs:element name="totHrsDoubletime" type="CPR:tot"/>
+                </xs:sequence></xs:complexType></xs:element>
+                <xs:element name="hrlyPayRate"><xs:complexType><xs:sequence>
+                  <xs:element name="hrlyPayRateStraightTime" type="CPR:ratePos"/>
+                  <xs:element name="hrlyPayRateOvertime" type="CPR:rate"/>
+                  <xs:element name="hrlyPayRateDoubletime" type="CPR:rate"/>
+                  <xs:element name="totalHrlyPayRateStraightTime" type="CPR:rate"/>
+                  <xs:element name="totalHrlyPayRateOvertime" type="CPR:rate"/>
+                  <xs:element name="totalHrlyPayRateDoubletime" type="CPR:rate"/>
+                </xs:sequence></xs:complexType></xs:element>
+              </xs:sequence><xs:attribute name="name" type="xs:string" use="required"/></xs:complexType></xs:element>
+            </xs:sequence></xs:complexType></xs:element>
+            <xs:element name="payments"><xs:complexType><xs:sequence>
+              <xs:element name="travelSubs" type="CPR:amt"/>
+            </xs:sequence></xs:complexType></xs:element>
+            <xs:element name="deductions"><xs:complexType><xs:sequence>
+              <xs:element name="fedTax" type="CPR:amt"/>
+              <xs:element name="FICA" type="CPR:amt"/>
+              <xs:element name="stateTax" type="CPR:amt"/>
+              <xs:element name="SDI" type="CPR:amt"/>
+              <xs:element name="fundAdmin" type="CPR:amt"/>
+              <xs:element name="savings" type="CPR:amt"/>
+              <xs:element name="dues" type="CPR:amt"/>
+              <xs:element name="other" type="CPR:amt"/>
+              <xs:element name="totalDeductions" type="CPR:amt"/>
+            </xs:sequence></xs:complexType></xs:element>
+            <xs:element name="earnings"><xs:complexType><xs:sequence>
+              <xs:element name="grossThisProject" type="CPR:amt"/>
+              <xs:element name="grossAllWork" type="CPR:amt"/>
+              <xs:element name="netWagePaidWeek" type="CPR:amt"/>
+              <xs:element name="checkNum"><xs:simpleType><xs:restriction base="xs:string"><xs:minLength value="1"/><xs:maxLength value="20"/></xs:restriction></xs:simpleType></xs:element>
+            </xs:sequence></xs:complexType></xs:element>
+          </xs:sequence></xs:complexType></xs:element>
+        </xs:sequence></xs:complexType></xs:element>
+      </xs:sequence></xs:complexType></xs:element>
+    </xs:sequence></xs:complexType>
+  </xs:element>
+</xs:schema>

@@ -8,12 +8,18 @@ export interface Employee {
   firstName: string;
   lastName: string;
   ssnLast4: string;
+  /** Street address. */
   address: string;
+  city?: string;
+  state?: string;
+  zip?: string;
   /** Hourly rate for regular (non-prevailing-wage) work. */
   regularRate: Cents;
   isApprentice: boolean;
   /** Apprenticeship program / registration, shown on certified payroll. */
   apprenticeProgram?: string;
+  /** Apprentice period / level 1-10 (required by DIR eCPR for apprentices). */
+  apprenticeLevel?: number;
   w4: FederalW4;
   de4: CaDE4;
   deductions: Deduction[];
@@ -35,6 +41,8 @@ export interface Project {
 
 export interface Classification extends ClassificationRate {
   projectId: string;
+  /** Official DIR craft name, e.g. "Laborer". Defaults to the classification name. */
+  craft?: string;
 }
 
 export interface StoredEntry {
@@ -67,6 +75,8 @@ export interface StoreData {
   projects: Project[];
   classifications: Classification[];
   entries: StoredEntry[];
+  /** Check numbers by `${weekStart}:${employeeId}`. */
+  checkNumbers?: Record<string, string>;
 }
 
 export const EMPTY_STORE: StoreData = {

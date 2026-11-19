@@ -238,6 +238,11 @@ function ProjectForm({
                   <Field label="Basic hourly rate">
                     <MoneyCell label="Basic hourly rate" value={c.basicHourly} onChange={(v) => setC(c.id, { basicHourly: v })} />
                   </Field>
+                  <div className="sm:col-span-2">
+                    <Field label="DIR craft name" hint="As listed on the DIR determination, e.g. Laborer. Used for eCPR.">
+                      <Input value={c.craft ?? ""} placeholder={c.name} onChange={(x) => setC(c.id, { craft: x.target.value })} />
+                    </Field>
+                  </div>
                   <Field label="Overtime multiplier">
                     <Input
                       type="number"
