@@ -17,6 +17,8 @@ risk and will go through an established payroll provider when added.
 - `src/lib/payroll/` pay engine (pure TypeScript, unit tested)
   - `overtime/california.ts` CA daily, weekly and 7th-day overtime
   - `gross.ts` basic pay, cash fringe, plan credits, training contributions
+  - `tax/` 2026 federal (Pub 15-T), California (EDD Method B), Social Security, Medicare, SDI
+  - `net.ts` gross to net with pre-tax and post-tax deductions
 - `supabase/migrations/` database schema with row level security per company
 - `src/app/` Next.js web app (works on phones and installs to the home screen)
 
