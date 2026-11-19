@@ -1,3 +1,5 @@
+import { SampleButton } from "@/components/SampleButton";
+
 const features = [
   {
     title: "California prevailing wage",
@@ -19,7 +21,7 @@ const features = [
 
 export default function Home() {
   return (
-    <main className="mx-auto max-w-4xl px-4 py-16">
+    <main className="py-8">
       <p className="text-sm font-semibold uppercase tracking-wide text-blue-700">CertiPay</p>
       <h1 className="mt-2 text-4xl font-bold tracking-tight text-slate-900">
         Certified payroll for small contractors
@@ -27,6 +29,12 @@ export default function Home() {
       <p className="mt-4 max-w-2xl text-lg text-slate-600">
         Run regular and prevailing wage payroll and print compliant certified payroll reports,
         without enterprise pricing.
+      </p>
+      <div className="mt-6">
+        <SampleButton />
+      </div>
+      <p className="mt-3 text-sm text-slate-500">
+        Preview: data is saved in this browser only until accounts are set up.
       </p>
       <div className="mt-12 grid gap-6 sm:grid-cols-2">
         {features.map((f) => (
