@@ -9,6 +9,7 @@ import type {
 import { NO_CREDITS } from "./types";
 
 export interface PayLine {
+  date: string;
   projectId: string;
   classificationId: string;
   classificationName: string;
@@ -20,6 +21,8 @@ export interface PayLine {
   cashFringeRate: Cents;
   basicPay: Cents;
   cashFringePay: Cents;
+  /** Credited plan contribution per hour. */
+  planRate: Cents;
   /** Employer contributions to approved plans for these hours (not in gross). */
   planContributions: Cents;
   /** Training fund contribution (CA: paid to the CAC or an approved fund). */
@@ -80,6 +83,7 @@ export function computeGross(
     const cashFringeRate = fringeApplies ? required - creditedTotal : 0;
 
     lines.push({
+      date: e.date,
       projectId: e.projectId,
       classificationId: e.classificationId,
       classificationName: r.name,
@@ -89,6 +93,7 @@ export function computeGross(
       cashFringeRate,
       basicPay: pay(basicRate, e.hours),
       cashFringePay: pay(cashFringeRate, e.hours),
+      planRate: fringeApplies ? creditedTotal : 0,
       planContributions: fringeApplies ? pay(creditedTotal, e.hours) : 0,
       trainingContribution: fringeApplies ? pay(r.fringe.training, e.hours) : 0,
     });

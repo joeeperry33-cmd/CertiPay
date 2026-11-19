@@ -169,6 +169,11 @@ function EmployeeForm({
               onChange={(x) => set({ isApprentice: x.target.checked })}
             />
           </div>
+          {e.isApprentice && (
+            <Field label="Apprenticeship program and level" hint="Shown on certified payroll, e.g. program name and period.">
+              <Input value={e.apprenticeProgram ?? ""} onChange={(x) => set({ apprenticeProgram: x.target.value })} />
+            </Field>
+          )}
         </div>
       </Card>
 

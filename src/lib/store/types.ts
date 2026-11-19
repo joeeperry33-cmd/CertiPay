@@ -12,6 +12,8 @@ export interface Employee {
   /** Hourly rate for regular (non-prevailing-wage) work. */
   regularRate: Cents;
   isApprentice: boolean;
+  /** Apprenticeship program / registration, shown on certified payroll. */
+  apprenticeProgram?: string;
   w4: FederalW4;
   de4: CaDE4;
   deductions: Deduction[];
@@ -23,6 +25,8 @@ export interface Project {
   projectNumber: string;
   awardingBody: string;
   dirProjectId: string;
+  /** Wage determination number(s) for this job, e.g. a DIR determination or a federal WD. */
+  wageDeterminationNumber?: string;
   county: string;
   location: string;
   isPrevailingWage: boolean;
@@ -49,6 +53,11 @@ export interface Company {
   fein: string;
   dirRegistration: string;
   cslbLicense: string;
+  /** Person who signs the statement of compliance. */
+  signerName?: string;
+  signerTitle?: string;
+  phone?: string;
+  email?: string;
 }
 
 export interface StoreData {

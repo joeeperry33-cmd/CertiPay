@@ -8,6 +8,7 @@ const links = [
   { href: "/projects", label: "Jobs" },
   { href: "/timesheets", label: "Timesheets" },
   { href: "/payroll", label: "Payroll" },
+  { href: "/reports", label: "Certified payroll" },
   { href: "/settings", label: "Company" },
 ];
 
