@@ -4,6 +4,7 @@ import { type FederalW4, federalWithholding } from "./tax/federal";
 import { employeePayrollTaxes } from "./tax/fica";
 
 export interface Deduction {
+  id?: string;
   label: string;
   amount: Cents;
   /** Pre-tax for income tax (e.g. 401(k), Section 125). */
