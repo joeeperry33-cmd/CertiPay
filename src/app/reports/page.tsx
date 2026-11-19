@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { Button, Card, Checkbox, Empty, Field, PageHeader, Select } from "@/components/ui";
 import { WeekPicker } from "@/components/WeekPicker";
 import { CertifiedPayrollReport, type ReportFormat } from "@/components/CertifiedPayrollReport";
+import { EcprPanel, checkNumbersFor } from "@/components/EcprPanel";
 import { useStore } from "@/lib/store/store";
 import { buildCertifiedPayroll } from "@/lib/reports/certified";
 import { mondayOf } from "@/lib/dates";
@@ -73,13 +74,20 @@ export default function ReportsPage() {
             </p>
           )}
           <p className="mt-4 text-xs text-slate-500">
-            California payrolls must also be submitted to DIR through eCPR. Print this report for the awarding body
-            and your records. Some federal agencies require the official DOL WH-347 PDF; this report carries the same
-            information.
+            Print this report for the awarding body and your records. Some federal agencies require the official DOL
+            WH-347 PDF; this report carries the same information.
           </p>
         </Card>
+        {chosenFormat === "ca" && report.payrollNumber > 0 && (
+          <EcprPanel key={`${project.id}:${weekStart}`} report={report} data={data} weekStart={weekStart} />
+        )}
       </div>
-      <CertifiedPayrollReport report={report} format={chosenFormat} finalPayroll={finalPayroll} />
+      <CertifiedPayrollReport
+        report={report}
+        format={chosenFormat}
+        finalPayroll={finalPayroll}
+        checkNumbers={checkNumbersFor(data, weekStart)}
+      />
     </main>
   );
 }

@@ -18,10 +18,13 @@ export function CertifiedPayrollReport({
   report: r,
   format,
   finalPayroll,
+  checkNumbers = {},
 }: {
   report: CertifiedPayroll;
   format: ReportFormat;
   finalPayroll: boolean;
+  /** Check numbers by employee id. */
+  checkNumbers?: Record<string, string>;
 }) {
   const ca = format === "ca";
   const title = ca ? "Public Works Certified Payroll Report" : "Certified Payroll (WH-347 information)";
@@ -69,7 +72,7 @@ export function CertifiedPayrollReport({
       ) : r.noWork ? (
         <NonPerformance r={r} />
       ) : (
-        <WorkerTable r={r} ca={ca} />
+        <WorkerTable r={r} ca={ca} checkNumbers={checkNumbers} />
       )}
 
       {!r.noWork && (
@@ -95,7 +98,7 @@ function Info({ label, value }: { label: string; value: string }) {
   );
 }
 
-function WorkerTable({ r, ca }: { r: CertifiedPayroll; ca: boolean }) {
+function WorkerTable({ r, ca, checkNumbers }: { r: CertifiedPayroll; ca: boolean; checkNumbers: Record<string, string> }) {
   const cell = "border border-slate-400 px-1 py-0.5";
   const num = `${cell} text-right tabular-nums`;
   return (
@@ -167,7 +170,7 @@ function WorkerTable({ r, ca }: { r: CertifiedPayroll; ca: boolean }) {
         </thead>
         <tbody>
           {r.rows.map((row, i) => (
-            <WorkerRows key={i} row={row} dates={r.dates} ca={ca} cell={cell} num={num} />
+            <WorkerRows key={i} row={row} dates={r.dates} ca={ca} cell={cell} num={num} checkNum={checkNumbers[row.employee.id]} />
           ))}
         </tbody>
       </table>
@@ -181,12 +184,14 @@ function WorkerRows({
   ca,
   cell,
   num,
+  checkNum,
 }: {
   row: CprWorkerRow;
   dates: string[];
   ca: boolean;
   cell: string;
   num: string;
+  checkNum?: string;
 }) {
   const buckets: PayBucket[] = row.totalHours.double > 0 ? ["straight", "overtime", "double"] : ["straight", "overtime"];
   const span = buckets.length;
@@ -208,7 +213,14 @@ function WorkerRows({
                 <div className="font-semibold">
                   {e.lastName}, {e.firstName}
                 </div>
-                {ca && e.address && <div>{e.address}</div>}
+                {ca && e.address && (
+                  <div>
+                    {e.address}
+                    {e.city && `, ${e.city}`}
+                    {e.state && `, ${e.state}`}
+                    {e.zip && ` ${e.zip}`}
+                  </div>
+                )}
                 <div>xxx-xx-{e.ssnLast4 || "____"}</div>
               </td>
               <td className={`${cell} text-center`} rowSpan={span}>
@@ -283,7 +295,9 @@ function WorkerRows({
               <td className={`${num} font-semibold`} rowSpan={span}>
                 {c ? money(c.netPay) : ""}
               </td>
-              <td className={cell} rowSpan={span} />
+              <td className={`${cell} text-center`} rowSpan={span}>
+                {c ? checkNum : ""}
+              </td>
             </>
           )}
         </tr>

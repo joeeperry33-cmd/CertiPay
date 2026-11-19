@@ -152,9 +152,24 @@ function EmployeeForm({
               onChange={(x) => set({ ssnLast4: x.target.value.replace(/\D/g, "") })}
             />
           </Field>
-          <Field label="Address">
-            <Input value={e.address} onChange={(x) => set({ address: x.target.value })} />
+          <Field label="Street address">
+            <Input maxLength={40} value={e.address} onChange={(x) => set({ address: x.target.value })} />
           </Field>
+          <div className="grid grid-cols-[2fr_1fr_1.5fr] gap-3">
+            <Field label="City">
+              <Input value={e.city ?? ""} onChange={(x) => set({ city: x.target.value })} />
+            </Field>
+            <Field label="State">
+              <Input
+                maxLength={2}
+                value={e.state ?? ""}
+                onChange={(x) => set({ state: x.target.value.toUpperCase().replace(/[^A-Z]/g, "") })}
+              />
+            </Field>
+            <Field label="ZIP">
+              <Input inputMode="numeric" maxLength={10} value={e.zip ?? ""} onChange={(x) => set({ zip: x.target.value })} />
+            </Field>
+          </div>
           <Field label="Regular hourly rate" hint="Used for work that is not prevailing wage.">
             <Input
               inputMode="decimal"
@@ -170,9 +185,23 @@ function EmployeeForm({
             />
           </div>
           {e.isApprentice && (
-            <Field label="Apprenticeship program and level" hint="Shown on certified payroll, e.g. program name and period.">
-              <Input value={e.apprenticeProgram ?? ""} onChange={(x) => set({ apprenticeProgram: x.target.value })} />
-            </Field>
+            <>
+              <Field label="Apprenticeship program" hint="Shown on certified payroll.">
+                <Input value={e.apprenticeProgram ?? ""} onChange={(x) => set({ apprenticeProgram: x.target.value })} />
+              </Field>
+              <Field label="Apprentice period / level (1-10)" hint="Required for DIR eCPR.">
+                <Input
+                  type="number"
+                  min={1}
+                  max={10}
+                  value={e.apprenticeLevel ?? ""}
+                  onChange={(x) => {
+                    const n = Number(x.target.value);
+                    set({ apprenticeLevel: Number.isInteger(n) && n >= 1 && n <= 10 ? n : undefined });
+                  }}
+                />
+              </Field>
+            </>
           )}
         </div>
       </Card>
