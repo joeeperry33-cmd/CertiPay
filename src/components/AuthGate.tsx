@@ -10,6 +10,7 @@ import { clearCloudData, startCloudData, useSyncStatus } from "@/lib/store/store
 type Phase =
   | { kind: "checking" }
   | { kind: "signedOut" }
+  | { kind: "resetPassword" }
   | { kind: "noCompany"; session: Session }
   | { kind: "loading" }
   | { kind: "ready"; session: Session; companyId: string }
@@ -29,11 +30,13 @@ function CloudGate({ children }: { children: ReactNode }) {
   const [phase, setPhase] = useState<Phase>({ kind: "checking" });
 
   useEffect(() => {
+    // Read before the client starts, because it clears the link's details from the address.
+    let recovering = typeof window !== "undefined" && /type=recovery/.test(window.location.hash + window.location.search);
     const sb = supabase();
     let cancelled = false;
 
     async function start(session: Session | null) {
-      if (cancelled) return;
+      if (cancelled || recovering) return;
       if (!session) {
         clearCloudData();
         setPhase({ kind: "signedOut" });
@@ -45,13 +48,13 @@ function CloudGate({ children }: { children: ReactNode }) {
         .select("company_id")
         .eq("user_id", session.user.id)
         .limit(1);
-      if (cancelled) return;
+      if (cancelled || recovering) return;
       if (error) return setPhase({ kind: "error", message: error.message });
       const companyId = data?.[0]?.company_id as string | undefined;
       if (!companyId) return setPhase({ kind: "noCompany", session });
       try {
         const loaded = await loadCompany(sb, companyId);
-        if (cancelled) return;
+        if (cancelled || recovering) return;
         startCloudData(loaded, (prev, next) => syncChanges(sb, companyId, prev, next));
         setPhase({ kind: "ready", session, companyId });
       } catch (e) {
@@ -59,8 +62,16 @@ function CloudGate({ children }: { children: ReactNode }) {
       }
     }
 
+    if (recovering) setPhase({ kind: "resetPassword" });
     sb.auth.getSession().then(({ data }) => start(data.session));
     const { data: sub } = sb.auth.onAuthStateChange((event, session) => {
+      // Arrived from a "reset your password" email: ask for a new password first.
+      if (event === "PASSWORD_RECOVERY") {
+        recovering = true;
+        setPhase({ kind: "resetPassword" });
+        return;
+      }
+      if (recovering) return;
       if (event === "SIGNED_IN" || event === "SIGNED_OUT") start(session);
     });
     return () => {
@@ -75,6 +86,8 @@ function CloudGate({ children }: { children: ReactNode }) {
       return <p className="py-12 text-center text-slate-500">Loading…</p>;
     case "signedOut":
       return <SignIn />;
+    case "resetPassword":
+      return <NewPassword onDone={() => window.location.replace("/")} />;
     case "noCompany":
       return <CreateCompany onCreated={() => window.location.reload()} />;
     case "error":
@@ -116,16 +129,31 @@ function AccountBar({ email }: { email: string }) {
 }
 
 function SignIn() {
-  const [mode, setMode] = useState<"signIn" | "signUp">("signIn");
+  const [mode, setMode] = useState<"signIn" | "signUp" | "forgot">("signIn");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
 
+  const switchTo = (next: "signIn" | "signUp" | "forgot") => {
+    setMode(next);
+    setMessage(null);
+  };
+
   const submit = async () => {
     setBusy(true);
     setMessage(null);
     const sb = supabase();
+    if (mode === "forgot") {
+      const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
+      setBusy(false);
+      // Same message whether or not the email has an account, so it can't be used to look up accounts.
+      return setMessage(
+        error
+          ? { ok: false, text: error.message }
+          : { ok: true, text: "If that email has an account, we sent a link to reset your password. Check your inbox." },
+      );
+    }
     const { data, error } =
       mode === "signIn"
         ? await sb.auth.signInWithPassword({ email, password })
@@ -139,7 +167,12 @@ function SignIn() {
 
   return (
     <Card className="mx-auto max-w-md">
-      <h1 className="text-xl font-bold text-slate-900">{mode === "signIn" ? "Sign in to CertiPay" : "Create your account"}</h1>
+      <h1 className="text-xl font-bold text-slate-900">
+        {mode === "signIn" ? "Sign in to CertiPay" : mode === "signUp" ? "Create your account" : "Reset your password"}
+      </h1>
+      {mode === "forgot" && (
+        <p className="mt-1 text-sm text-slate-600">Enter your email and we&apos;ll send you a link to choose a new password.</p>
+      )}
       <form
         className="mt-4 space-y-4"
         onSubmit={(e) => {
@@ -150,30 +183,33 @@ function SignIn() {
         <Field label="Email">
           <Input type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
         </Field>
-        <Field label="Password" hint={mode === "signUp" ? "At least 8 characters." : undefined}>
-          <Input
-            type="password"
-            autoComplete={mode === "signIn" ? "current-password" : "new-password"}
-            minLength={mode === "signUp" ? 8 : undefined}
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </Field>
+        {mode !== "forgot" && (
+          <Field label="Password" hint={mode === "signUp" ? "At least 8 characters." : undefined}>
+            <Input
+              type="password"
+              autoComplete={mode === "signIn" ? "current-password" : "new-password"}
+              minLength={mode === "signUp" ? 8 : undefined}
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </Field>
+        )}
         {message && <p className={`text-sm ${message.ok ? "text-green-700" : "text-red-700"}`}>{message.text}</p>}
         <Button type="submit" disabled={busy} className="w-full">
-          {mode === "signIn" ? "Sign in" : "Create account"}
+          {mode === "signIn" ? "Sign in" : mode === "signUp" ? "Create account" : "Send reset link"}
         </Button>
       </form>
-      <button
-        className="mt-4 text-sm text-blue-700 hover:underline"
-        onClick={() => {
-          setMode(mode === "signIn" ? "signUp" : "signIn");
-          setMessage(null);
-        }}
-      >
-        {mode === "signIn" ? "New to CertiPay? Create an account" : "Already have an account? Sign in"}
-      </button>
+      <div className="mt-4 flex flex-col items-start gap-2 text-sm">
+        {mode === "signIn" && (
+          <button className="text-blue-700 hover:underline" onClick={() => switchTo("forgot")}>
+            Forgot password?
+          </button>
+        )}
+        <button className="text-blue-700 hover:underline" onClick={() => switchTo(mode === "signIn" ? "signUp" : "signIn")}>
+          {mode === "signIn" ? "New to CertiPay? Create an account" : "Back to sign in"}
+        </button>
+      </div>
     </Card>
   );
 }
@@ -203,6 +239,42 @@ function CreateCompany({ onCreated }: { onCreated: () => void }) {
         {error && <p className="text-sm text-red-700">{error}</p>}
         <Button type="submit" disabled={busy || !name.trim()} className="w-full">
           Continue
+        </Button>
+      </form>
+    </Card>
+  );
+}
+
+function NewPassword({ onDone }: { onDone: () => void }) {
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  return (
+    <Card className="mx-auto max-w-md">
+      <h1 className="text-xl font-bold text-slate-900">Choose a new password</h1>
+      <form
+        className="mt-4 space-y-4"
+        onSubmit={async (e) => {
+          e.preventDefault();
+          if (password !== confirm) return setError("The two passwords don't match.");
+          setBusy(true);
+          setError("");
+          const { error } = await supabase().auth.updateUser({ password });
+          setBusy(false);
+          if (error) setError(error.message);
+          else onDone();
+        }}
+      >
+        <Field label="New password" hint="At least 8 characters.">
+          <Input type="password" autoComplete="new-password" minLength={8} required value={password} onChange={(e) => setPassword(e.target.value)} />
+        </Field>
+        <Field label="Confirm new password">
+          <Input type="password" autoComplete="new-password" minLength={8} required value={confirm} onChange={(e) => setConfirm(e.target.value)} />
+        </Field>
+        {error && <p className="text-sm text-red-700">{error}</p>}
+        <Button type="submit" disabled={busy} className="w-full">
+          Save new password
         </Button>
       </form>
     </Card>
